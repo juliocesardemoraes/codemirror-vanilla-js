@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>browser-amd-editor</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <style>
+      body {
+        background: #1e1e1e;
+      }
+      h2 {
+        color: #fff;
+      }
+    </style>
+    <h2>Code Mirror</h2>
+    <div id="codeParent"></div>
+
+    <div id="result" style="margin-top: 20px; font-family: monospace"></div>
+    <div class="fakeMenu">
+      <div class="fakeButtons fakeClose"></div>
+      <div class="fakeButtons fakeMinimize"></div>
+      <div class="fakeButtons fakeZoom"></div>
+    </div>
+    <div class="fakeScreen"></div>
+
+    <script type="module">
+      import { EditorView, basicSetup } from "codemirror";
+      import { javascript } from "@codemirror/lang-javascript";
+      import { oneDark } from "@codemirror/theme-one-dark";
+      // import { html } from "@codemirror/lang-html";
+      const parent = document.getElementById("codeParent");
+      const fakeScreen = document.getElementsByClassName("fakeScreen")[0];
+      console.log(fakeScreen);
+      let textToEval = null;
+
+      console.defaultLog = console.log.bind(console);
+      console.logs = [];
+      console.log = function () {
+        // default &  console.log()
+        console.defaultLog.apply(console, arguments);
+        // new & array data
+        console.logs.push(arguments);
+      };
+
+      let editor = new EditorView({
+        extensions: [
+          basicSetup,
+          javascript(),
+          oneDark,
+          EditorView.updateListener.of(function (e) {
+            if (e.docChanged) {
+              textToEval = e.state.doc.toString();
+              console.log(console.logs);
+              if (textToEval) {
+                fakeScreen.innerHTML = `
+                  <p class="line1">${console.logs[0]}<span class="cursor1">_</span></p>
+                `;
+              }
+            }
+          }),
+        ],
+        parent: parent,
+      });
+
+      /*
+      <p class="line1">$ yo gulp-webapp<span class="cursor1">_</span></p>
+
+      */
+    </script>
+  </body>
+</html>
